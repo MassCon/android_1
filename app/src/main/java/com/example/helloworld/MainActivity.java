@@ -20,9 +20,9 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Button b = findViewById(R.id.button);
-        Button b2 = findViewById(R.id.button2);
-        Button b3 = findViewById(R.id.button3);
+        //Button b = findViewById(R.id.button);
+        //Button b2 = findViewById(R.id.button2);
+        //Button b3 = findViewById(R.id.button3);
 
         LocalDateTime targetDateTime = LocalDateTime.of(2024, 2, 7, 8, 5);
 
@@ -31,13 +31,13 @@ public class MainActivity extends AppCompatActivity {
 
         String msg = formatTimeLeft(duration.toDays(), duration.toHours() % 24, duration.toMinutes() % 60);
 
-        b3.setOnClickListener(v -> Toast.makeText(MainActivity.this, msg, Toast.LENGTH_SHORT).show());
+        //b3.setOnClickListener(v -> Toast.makeText(MainActivity.this, msg, Toast.LENGTH_SHORT).show());
 
-        b.setOnClickListener(v -> v.setBackgroundColor(generateRandomColor()));
+        //b.setOnClickListener(v -> v.setBackgroundColor(generateRandomColor()));
 
         final int[] clicksCount = {0};
 
-        b2.setOnClickListener( v -> ( ( Button ) v ).setText( ( "Кількість кліків: " + ++(clicksCount[0])) ) );
+        //b2.setOnClickListener( v -> ( ( Button ) v ).setText( ( "Кількість кліків: " + ++(clicksCount[0])) ) );
     }
 
     private int generateRandomColor() {
