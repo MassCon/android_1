@@ -1,128 +1,140 @@
 package com.example.helloworld;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
-import android.graphics.Color;
+import android.Manifest;
+import android.content.ContentResolver;
+import android.database.Cursor;
 import android.os.Bundle;
+import android.provider.ContactsContract;
+import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.Button;
-import android.widget.GridLayout;
-import android.widget.Toast;
+import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.CheckBox;
+import android.widget.ImageView;
+import android.widget.ListView;
+import android.widget.TextView;
 
-import java.time.Duration;
-import java.time.LocalDateTime;
-import java.util.Random;
-import java.util.concurrent.atomic.AtomicInteger;
+import com.karumi.dexter.Dexter;
+import com.karumi.dexter.MultiplePermissionsReport;
+import com.karumi.dexter.PermissionToken;
+import com.karumi.dexter.listener.PermissionRequest;
+import com.karumi.dexter.listener.multi.MultiplePermissionsListener;
+
+import java.util.ArrayList;
+import java.util.List;
+
 
 public class MainActivity extends AppCompatActivity {
 
-    private GridLayout gridLayout;
-    private Button[][] buttons;
-    private boolean isPlayerX = true;
+    private RecyclerView recyclerView;
+    private WishlistAdapter adapter;
+    private List<WishlistItem> wishlistItems;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        gridLayout = findViewById(R.id.gridLayout);
-        initializeButtons();
+        recyclerView = findViewById(R.id.recyclerView);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+
+        wishlistItems = generateSampleWishlistItems();
+        adapter = new WishlistAdapter(wishlistItems);
+        recyclerView.setAdapter(adapter);
+
+        double totalSum = calculateTotalSum();
+        TextView totalSumTextView = findViewById(R.id.totalSumTextView);
+        totalSumTextView.setText("Total: $" + String.format("%.2f", totalSum));
     }
 
-    private void initializeButtons() {
-        buttons = new Button[3][3];
+    private double calculateTotalSum() {
+        double totalSum = 0.0;
 
-        for (int i = 0; i < 3; i++) {
-            for (int j = 0; j < 3; j++) {
-                String buttonID = "button" + (i * 3 + j + 1);
-                int resID = getResources().getIdentifier(buttonID, "id", getPackageName());
+        for (WishlistItem item : wishlistItems) {
+            totalSum += item.getCost();
+        }
 
-                buttons[i][j] = findViewById(resID);
-                buttons[i][j].setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        onButtonClick((Button) v);
-                    }
-                });
-            }
+        return totalSum;
+    }
+
+    private List<WishlistItem> generateSampleWishlistItems() {
+        List<WishlistItem> items = new ArrayList<>();
+        items.add(new WishlistItem("solar charger", 20, R.drawable.charger));
+        items.add(new WishlistItem("levitating speaker", 15, R.drawable.speaker));
+        items.add(new WishlistItem("bamboo towels", 8, R.drawable.towels));
+        return items;
+    }
+
+    private static class WishlistViewHolder extends RecyclerView.ViewHolder {
+        private ImageView itemImage;
+        private TextView itemName;
+        private TextView itemCost;
+        private CheckBox itemCheckbox;
+
+        public WishlistViewHolder(View itemView) {
+            super(itemView);
+            itemImage = itemView.findViewById(R.id.itemImage);
+            itemName = itemView.findViewById(R.id.itemName);
+            itemCost = itemView.findViewById(R.id.itemCost);
+            itemCheckbox = itemView.findViewById(R.id.itemCheckbox);
         }
     }
 
-    private void onButtonClick(Button button) {
-        if (button.getText().toString().equals("")) {
-            if (isPlayerX) {
-                button.setText("X");
-            } else {
-                button.setText("O");
-            }
+    private class WishlistAdapter extends RecyclerView.Adapter<WishlistViewHolder> {
+        private List<WishlistItem> items;
 
-            if (checkForWinner()) {
-                String winner = isPlayerX ? "Checks" : "Zeros";
-                Toast.makeText(this, winner + " Win!", Toast.LENGTH_SHORT).show();
-                resetGame();
-            } else if (isBoardFull()) {
-                Toast.makeText(this, "draw!", Toast.LENGTH_SHORT).show();
-                resetGame();
-            } else {
-                isPlayerX = !isPlayerX;
-            }
+        public WishlistAdapter(List<WishlistItem> items) {
+            this.items = items;
+        }
+
+        @Override
+        public WishlistViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_layout, parent, false);
+            return new WishlistViewHolder(view);
+        }
+
+        @Override
+        public void onBindViewHolder(WishlistViewHolder holder, int position) {
+            WishlistItem currentItem = items.get(position);
+
+            // Set item data to the ViewHolder
+            holder.itemImage.setImageResource(currentItem.getImageResourceId());
+            holder.itemName.setText(currentItem.getName());
+            holder.itemCost.setText(String.valueOf(currentItem.getCost()));
+            holder.itemCheckbox.setChecked(false); // Initialize checkbox state (modify as needed)
+        }
+
+        @Override
+        public int getItemCount() {
+            return items.size();
         }
     }
+    public class WishlistItem {
+        private String name;
+        private double cost;
+        private int imageResourceId;
 
-    private boolean checkForWinner() {
-        // Check rows
-        for (int i = 0; i < 3; i++) {
-            if (buttons[i][0].getText().toString().equals(buttons[i][1].getText().toString())
-                    && buttons[i][0].getText().toString().equals(buttons[i][2].getText().toString())
-                    && !buttons[i][0].getText().toString().equals("")) {
-                return true;
-            }
+        public WishlistItem(String name, double cost, int imageResourceId) {
+            this.name = name;
+            this.cost = cost;
+            this.imageResourceId = imageResourceId;
         }
 
-        // Check columns
-        for (int i = 0; i < 3; i++) {
-            if (buttons[0][i].getText().toString().equals(buttons[1][i].getText().toString())
-                    && buttons[0][i].getText().toString().equals(buttons[2][i].getText().toString())
-                    && !buttons[0][i].getText().toString().equals("")) {
-                return true;
-            }
+        public String getName() {
+            return name;
         }
 
-        // Check diagonals
-        if (buttons[0][0].getText().toString().equals(buttons[1][1].getText().toString())
-                && buttons[0][0].getText().toString().equals(buttons[2][2].getText().toString())
-                && !buttons[0][0].getText().toString().equals("")) {
-            return true;
+        public double getCost() {
+            return cost;
         }
 
-        if (buttons[0][2].getText().toString().equals(buttons[1][1].getText().toString())
-                && buttons[0][2].getText().toString().equals(buttons[2][0].getText().toString())
-                && !buttons[0][2].getText().toString().equals("")) {
-            return true;
+        public int getImageResourceId() {
+            return imageResourceId;
         }
-
-        return false;
-    }
-
-    private boolean isBoardFull() {
-        for (int i = 0; i < 3; i++) {
-            for (int j = 0; j < 3; j++) {
-                if (buttons[i][j].getText().toString().equals("")) {
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
-
-    private void resetGame() {
-        // Clear the text on all buttons
-        for (int i = 0; i < 3; i++) {
-            for (int j = 0; j < 3; j++) {
-                buttons[i][j].setText("");
-            }
-        }
-        // Reset the player to X
-        isPlayerX = true;
     }
 }
