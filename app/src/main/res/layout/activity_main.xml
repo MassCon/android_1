@@ -1,28 +1,81 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="10dp">
+    android:padding="16dp">
 
-    <EditText
-        android:id="@+id/searchEditText"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Search Contacts" />
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/contactsRecyclerView"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1" />
-
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/addContactButton"
+    <TextView
+        android:id="@+id/textViewSender"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_margin="16dp"
-        android:src="@drawable/ic_add"/>
+        android:text="Sender Account:"
+        android:textSize="18sp" />
 
-</LinearLayout>
+    <Spinner
+        android:id="@+id/senderSpinner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/textViewSender"
+        android:layout_marginTop="8dp"
+        />
+
+    <TextView
+        android:id="@+id/textViewReceiver"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Receiver Account:"
+        android:textSize="18sp"
+        android:layout_below="@id/senderSpinner"
+        android:layout_marginTop="16dp"/>
+
+    <Spinner
+        android:id="@+id/receiverSpinner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/textViewReceiver"
+        android:layout_marginTop="8dp"
+        />
+
+    <EditText
+        android:id="@+id/editTextAmount"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/receiverSpinner"
+        android:layout_marginTop="16dp"
+        android:hint="Amount"
+        android:inputType="numberDecimal" />
+
+    <Button
+        android:id="@+id/buttonSend"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/editTextAmount"
+        android:layout_marginTop="16dp"
+        android:text="Send" />
+
+    <Button
+        android:id="@+id/buttonCancel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/buttonSend"
+        android:layout_marginTop="16dp"
+        android:text="Cancel" />
+
+    <TextView
+        android:id="@+id/textViewAccountList"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/buttonCancel"
+        android:layout_marginTop="16dp"
+        android:text="Account List:"
+        android:textSize="18sp" />
+
+    <ListView
+        android:id="@+id/listViewAccounts"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/textViewAccountList"
+        android:layout_marginTop="8dp" />
+
+</RelativeLayout>
